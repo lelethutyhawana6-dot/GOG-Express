@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>GOG Express Runner</title>
+</head>
+
+<body>
+
+    <h1>🏍️ GOG EXPRESS RUNNER DASHBOARD</h1>
+    <h2> Ready to go? Enjoy, mate!</h2>
+
+    <button onclick="loadOrders()">
+        Load Orders
+    </button>
+
+    <button onclick="loadOrderSummary()">
+    Order Summary
+</button>
+
+    <hr>
+
+    <div id="ordersList">
+
+        No orders loaded yet.
+
+    </div>
+<button onclick="testSound()">
+    🔔 Test Sound
+</button>
+
+</body>    
+
+    <script type="module">
+
+        import { initializeApp }
+        from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+
+        import {
+            getFirestore,
+            collection,
+            getDocs,
+            doc,
+            updateDoc
+        }
+        from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+
+        const firebaseConfig = {
+
+            apiKey: "AIzaSyBW6l4EVSaaNYnxuIt2rVsVDEj2RQdXBR8",
+
+            authDomain: "gog-express.firebaseapp.com",
+
+            projectId: "gog-express",
+
+            storageBucket: "gog-express.firebasestorage.app",
+
+            messagingSenderId: "831128185396",
+
+            appId: "1:831128185396:web:e6a3b4bbaa4b0c1e103861",
+
+            measurementId: "G-2R7CLDKEPV"
+
+        };
+
+const notificationSound = new Audio("notification.mp3");
+function testSound() {
+    notificationSound.play();
+}
+
+window.testSound = testSound;
+
+        const app =
+            initializeApp(firebaseConfig);
+
+        const db =
+            getFirestore(app);
+
+        async function loadOrders() {
+
+            let html = "";
+
+            const querySnapshot =
+                await getDocs(
+                    collection(db, "orders")
+                );
+
+            querySnapshot.forEach((doc) => {
+
+                const data = doc.data();
+
+            if (data.status !== "Pending Payment") {
+              return;
+            }
+                console.log(doc.id);
+
+                html += `
+
+                <div style="
+                border:1px solid black;
+                margin:10px;
+                padding:10px;
+                ">
+
+                <h3>${data.orderNumber}</h3>
+
+                <p>
+                Customer:
+                ${data.customer}
+                </p>
+
+                <p>
+                Location:
+                ${data.location}
+                </p>
+
+                <p>
+                Institution:
+                ${data.institution}
+                </p>
+
+                <p>
+                Total:
+                R${data.total}
+                </p>
+
+                <p>
+                Runner:
+                ${data.runner}
+                </p>
+
+                <p>
+                Status:
+                ${data.status}
+                </p>
+
+                </div>
+                <button onclick="acceptOrder('${doc.id}')">
+Accept Order
+</button>
+
+                `;
+
+            });
+
+            document.getElementById(
+                "ordersList"
+            ).innerHTML = html;
+
+            
+        }
+
+
+        async function acceptOrder(id) {
+
+    await updateDoc(
+        doc(db, "orders", id),
+        {
+            runner: "Lelethu",
+            status: "Accepted"
+        }
+    );
+
+    alert("Order Accepted!");
+
+    loadOrders();
+}
+
+async function startDelivery(id) {
+
+    await updateDoc(
+        doc(db, "orders", id),
+        {
+            status: "In Transit"
+        }
+    );
+
+    alert("Delivery Started!");
+
+    loadOrderSummary();
+
+}
+
+async function completeDelivery(id) {
+
+    const querySnapshot =
+        await getDocs(
+            collection(db, "orders")
+        );
+
+    let orderData = null;
+
+    querySnapshot.forEach((docSnap) => {
+
+        if(docSnap.id === id){
+            orderData = docSnap.data();
+        }
+
+    });
+
+    const enteredPin =
+        document.getElementById(
+            `pin-${id}`
+        ).value;
+
+    if(
+        enteredPin != orderData.orderCode
+    ){
+        alert("Incorrect PIN!");
+        return;
+    }
+
+    await updateDoc(
+        doc(db, "orders", id),
+        {
+            status: "Delivered"
+        }
+    );
+
+    alert("Delivery Completed!");
+
+    loadOrderSummary();
+
+}
+
+window.loadOrders = loadOrders;
+window.acceptOrder = acceptOrder;
+window.loadOrderSummary = loadOrderSummary;
+window.startDelivery = startDelivery;
+window.completeDelivery = completeDelivery;
+
+async function loadOrderSummary() {
+
+    let html = "";
+
+    const querySnapshot =
+        await getDocs(
+            collection(db, "orders")
+        );
+
+    querySnapshot.forEach((docSnap) => {
+
+        const data = docSnap.data();
+
+        if (data.runner !== "Lelethu") {
+            return;
+        }
+
+        html += `
+
+        <div style="
+        border:1px solid green;
+        margin:10px;
+        padding:10px;
+        ">
+
+        <h3>${data.orderNumber}</h3>
+
+        <p>
+        Customer:
+        ${data.customer}
+        </p>
+
+        <p>
+        Location:
+        ${data.location}
+        </p>
+
+        <p>
+        Institution:
+        ${data.institution}
+        </p>
+
+        <p>
+        Total:
+        R${data.total}
+        </p>
+        
+        <p>
+        <b>Special Request:
+        ${data.specialRequest || "None"}
+        </p>
+
+        <p>
+        Runner:
+        ${data.runner}
+        </p>
+
+        <p>
+        Status:
+        ${data.status}
+        
+        
+        ${data.status === "Accepted"
+? `<button onclick="startDelivery('${docSnap.id}')">
+     Confirm Pick-up / Payment
+   </button>`
+: ""}
+
+${data.status === "In Transit"
+? `
+<input
+id="pin-${docSnap.id}"
+placeholder="Enter PIN">
+
+
+
+<button onclick="completeDelivery('${docSnap.id}')">
+Confirm Delivery
+</button>
+`
+: ""}
+
+        </p>
+
+        </div>
+
+        `;
+
+    });
+
+    document.getElementById(
+        "ordersList"
+    ).innerHTML = html;
+
+}
+
+    </script>
+
+</body>
+
+</html> 

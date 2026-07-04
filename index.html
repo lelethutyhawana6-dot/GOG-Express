@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>GOG Express MVP v1.0</title>
+
+    <style>
+        .item-card{
+    background:white;
+    padding:15px;
+    margin:10px 0;
+    border-radius:10px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+        .categories{
+    margin-top:20px;
+    margin-bottom:20px;
+}
+
+.categories button{
+    margin:5px;
+}
+
+        body{
+            font-family: Arial, sans-serif;
+            background:#f4f4f4;
+            padding:20px;
+        }
+
+        .card{
+            background:white;
+            max-width:700px;
+            margin:auto;
+            padding:25px;
+            border-radius:20px;
+            box-shadow:0 0 15px rgba(0,0,0,0.1);
+        }
+
+        h1{
+            color:rgb(255, 196, 0);
+        }
+
+        .shop{
+            background:#fff8e1;
+            padding:15px;
+            border-radius:10px;
+            margin-top:20px;
+        }
+
+        .menu-item{
+            background:#f9f9f9;
+            padding:12px;
+            margin:10px 0;
+            border-radius:10px;
+        }
+
+        button{
+            background:orange;
+            color:white;
+            border:none;
+            padding:10px 15px;
+            border-radius:8px;
+            cursor:pointer;
+        }
+
+        button:hover{
+            background:darkorange;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <p><b>Born eKasi. Built for the Future.</b></p>
+
+    <h1>🚚 GOG EXPRESS</h1>
+
+<p><i>
+"We used to stand in queues.
+Now we're ordering."
+</i></p>
+
+<p>
+
+</p>
+
+    <p>Welcome to GOG Express.</p>
+
+    <div class="shop">
+
+        <h2>Thangana Fast Foods</h2>
+
+        <p>Fresh Amagwinya Delivered Fast</p>
+        
+        <h3>Menu</h3>
+
+        <div class="categories">
+
+<button>Amagwinya</button>
+
+<button>Umndundu</button>
+
+<button>Fries</button>
+
+<button>Drinks</button>
+
+</div>
+
+     
+<div class="item-card">
+
+    <h4>🍟 Amagwinya - plain</h4>
+
+    <p>R3.50</p>
+
+
+  <button onclick="removeAmagwinya()">-</button>
+
+<span id="amagwinyaQty">0</span>
+
+<button onclick="addAmagwinya()">+</button>
+
+
+</div>
+
+<div class="item-card">
+ 
+    <h4>🍟 Small Fries</h4>
+    <p>R10.00</p>
+
+    <button onclick="decreaseSmall()">-</button>
+
+    <span id="smallQty">0</span>
+
+    <button onclick="increaseSmall()">+</button>
+    
+</div>
+
+<div class="item-card">
+
+    <h4>🍟 Medium Fries</h4>
+
+    <p>R15.00</p>
+
+    <button onclick="decreaseMedium()">-</button>
+
+    <span id="mediumQty">0</span>
+
+    <button onclick="increaseMedium()">+</button>
+
+</div>
+
+<div class="item-card">
+    <h4>🍟 Large Fries</h4>
+    <p>R20.00</p>
+
+    <button onclick="decreaseLarge()">-</button>
+
+    <span id="largeQty">0</span>
+
+    <button onclick="increaseLarge()">+</button>
+
+</div>
+
+<div class="item-card">
+    <h4>🥤Cold Drink 300ml
+    <p>R6.00</p>
+
+    <button onclick="decreaseCold()">-</button>
+
+    <span id="coldQty">0</span>
+
+    <button onclick="increaseCold()">+</button>
+
+
+ </div>
+    
+<hr>
+
+<h3>Can't find your item?</h3>
+
+<p>
+Type anything you would like us to buy.
+</p>
+
+<textarea
+    id="specialRequest"
+    placeholder="Example: Streetwise 2, 2L Coke, Bread, etc."
+    rows="4"
+    style="width:100%;">
+</textarea>
+
+<br><br>
+ 
+     <div>
+        <button onclick="placeOrder()">Place Order</button>
+<h3>🛒 Cart Total: R<span id="cartTotal">0.00</span></h3> 
+
+<button onclick="viewOrders()">
+📋 View Orders
+</button> </div>
+
+    <div id="savedOrders"></div>
+
+    <h3>👤 Customer Details</h3>
+
+<input type="text" id="initials" placeholder="Initials">
+
+<br><br>
+
+<input type="text" id="surname" placeholder="Surname">
+
+<br><br>
+
+<input type="text" id="location" placeholder="Location (e.g. 10A, office 1, etc)">
+
+<br><br>
+
+<input type="text" id="institution" placeholder="Institution (e.g. School name)">
+
+<br><br>
+
+<label>
+    <input type="checkbox" id="rememberMe">
+    Remember me on this device
+</label>
+
+<br><br>
+
+<button onclick="saveUser()">Save Details</button>
+
+<h3>📋 Order Summary</h3>
+
+<div id="orderSummary">
+
+No order submitted yet.
+
+</div>
+
+<div id="ordersList"></div>
+
+
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc
+}
+from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBW6l4EVSaaNYnxuIt2rVsVDEj2RQdXBR8",
+  authDomain: "gog-express.firebaseapp.com",
+  projectId: "gog-express",
+  storageBucket: "gog-express.firebasestorage.app",
+  messagingSenderId: "831128185396",
+  appId: "1:831128185396:web:e6a3b4bbaa4b0c1e103861",
+  measurementId: "G-2R7CLDKEPV"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+console.log("Firestore Connected!");
+
+console.log("Firebase Connected!");
+
+async function testSave() {
+
+    try {
+
+        await addDoc(
+            collection(db, "customers"),
+            {
+                name: "Lelethu",
+                company: "GOG Express"
+            }
+        );
+
+        alert("Saved!");
+        
+orders.push(orderData);
+
+    } catch(error) {
+
+        console.error(error);
+
+    }
+
+}
+async function placeOrder() {
+
+    if (!validateCustomer()) {
+        return;
+    }
+let currentOrder =
+"GOG-" + String(orderNumber).padStart(3, "0");
+
+orderNumber++;
+let orderItems = "";
+
+if (amagwinya > 0) {
+    orderItems += amagwinya + " Plain Amagwinya\n";
+}
+
+if (smallCount > 0) {
+    orderItems += smallCount + " Small Fries\n";
+}
+
+if (mediumCount > 0) {
+    orderItems += mediumCount + " Medium Fries\n";
+}
+
+if (largeCount > 0) {
+    orderItems += largeCount + " Large Fries\n";
+}
+
+if (coldCount > 0) {
+    orderItems += coldCount + " Cold Drink\n";
+}
+
+let cart =
+parseFloat(
+    document.getElementById("cartTotal").innerText
+);
+
+const specialRequest =
+    document.getElementById("specialRequest").value.trim();
+
+if (cart.length === 0 && specialRequest === "") {
+    alert("Please select at least one item or enter a special request.");
+    return;
+}
+
+
+  let summary = `
+
+<h2>GOG EXPRESS ORDER</h2>
+
+<p>
+<b style="font-size:28px; color:#d97706;">
+Order Number: ${currentOrder}
+</b>
+</p>
+
+<p>
+<b>Customer:</b><br>
+${document.getElementById("initials").value}
+${document.getElementById("surname").value}
+</p>
+
+<p>
+<b>Location:</b><br>
+${document.getElementById("location").value}
+</p>
+
+<p>
+<b>Institution:</b><br>
+${document.getElementById("institution").value}
+</p>
+
+<p>
+<b>Special Request:</b><br>
+${document.getElementById("specialRequest").value}
+</p>
+
+<hr>
+
+<p><b>Order:</b></p>
+
+${orderItems}
+
+<hr>
+
+<h2>Total: R${document.getElementById("cartTotal").innerText}</h2>
+
+<p>
+<b>Status:</b>
+🟡 Pending Payment
+</p>
+
+`;
+
+
+    document.getElementById("orderSummary").innerHTML =
+        summary;
+
+const deliveryPin =
+    Math.floor(1000 + Math.random() * 9000);
+
+const orderData = {
+
+    orderNumber: currentOrder,
+
+    orderCode: deliveryPin,
+
+    customer:
+        document.getElementById("initials").value +
+        " " +
+        document.getElementById("surname").value,
+
+    location:
+        document.getElementById("location").value,
+
+    institution:
+        document.getElementById("institution").value,
+
+    total:
+        document.getElementById("cartTotal").innerText,
+
+
+    runner: "Unassigned",
+
+    status: "Pending Payment",
+
+    specialRequest:
+    document.getElementById("specialRequest").value,
+
+    createdAt: Date.now(),
+
+};
+
+await addDoc(
+    collection(db, "orders"),
+    orderData
+);
+
+alert(
+`Order Created!
+
+Order Number: ${currentOrder}
+
+Delivery PIN: ${deliveryPin}
+
+Keep this PIN safe.
+You will give it to the runner when your order arrives.`
+);
+
+console.log("Order saved to Firestore!");
+
+}
+
+
+window.db = db;
+window.addDoc = addDoc;
+window.collection = collection;
+
+window. testSave = testSave;
+window.placeOrder = placeOrder;
+
+
+</script>
+
+<script>
+
+let orders = [];
+
+let orderNumber = 1;
+
+    function validateCustomer() {
+
+    let initials = document.getElementById("initials").value.trim();
+    let surname = document.getElementById("surname").value.trim();
+    let location = document.getElementById("location").value.trim();
+    let institution = document.getElementById("institution").value.trim();
+
+    if (
+        initials === "" ||
+        surname === "" ||
+        location === "" ||
+        institution === ""
+    ) {
+
+        alert("⚠ Please complete all customer details before placing an order.");
+
+        return false;
+    }
+
+    return true;
+}
+
+
+    function saveUser() {
+
+    if(document.getElementById("rememberMe").checked){
+
+        localStorage.setItem(
+            "initials",
+            document.getElementById("initials").value
+        );
+
+        localStorage.setItem(
+            "surname",
+            document.getElementById("surname").value
+        );
+
+        localStorage.setItem(
+            "location",
+            document.getElementById("location").value
+        );
+
+        localStorage.setItem(
+            "institution",
+            document.getElementById("institution").value
+        );
+
+        alert("Details saved!");
+    }
+}
+
+window.onload = function(){
+
+    document.getElementById("initials").value =
+        localStorage.getItem("initials") || "";
+
+    document.getElementById("surname").value =
+        localStorage.getItem("surname") || "";
+
+    document.getElementById("location").value =
+        localStorage.getItem("location") || "";
+
+    document.getElementById("institution").value =
+        localStorage.getItem("institution") || "";
+}
+
+let mediumCount = 0;
+
+function increaseMedium() {
+    mediumCount++;
+    document.getElementById("mediumQty").innerText = mediumCount;
+
+updateTotal();
+}
+
+function decreaseMedium() {
+
+    if (mediumCount > 0) {
+        mediumCount--;
+    }
+
+    document.getElementById("mediumQty").innerText = mediumCount;
+
+updateTotal();
+}
+
+
+let amagwinya = 0;
+
+function addAmagwinya() {
+    amagwinya++;
+    document.getElementById("amagwinyaQty").innerHTML = amagwinya;
+
+    updateTotal();
+}
+
+function removeAmagwinya() {
+    if (amagwinya > 0) {
+        amagwinya--;
+        document.getElementById("amagwinyaQty").innerHTML = amagwinya;
+        
+        updateTotal();
+    }
+}
+
+let smallCount = 0;
+
+function increaseSmall() {
+    smallCount++;
+    document.getElementById("smallQty").innerText = smallCount;
+    updateTotal();
+}
+
+function decreaseSmall() {
+
+    if (smallCount > 0) {
+        smallCount--;
+    }
+
+    document.getElementById("smallQty").innerText = smallCount;
+    updateTotal();
+}
+
+let largeCount = 0;
+
+function increaseLarge() {
+    largeCount++;
+    document.getElementById("largeQty").innerText = largeCount;
+    updateTotal();
+}
+
+function decreaseLarge() {
+
+    if (largeCount > 0) {
+        largeCount--;
+    }
+
+    document.getElementById("largeQty").innerText = largeCount;
+    updateTotal();
+}
+
+let coldCount = 0;
+
+function increaseCold() {
+    coldCount++;
+    document.getElementById("coldQty").innerText = coldCount;
+    updateTotal();
+}
+
+function decreaseCold() {
+
+    if (coldCount > 0) {
+        coldCount--;
+    }
+
+    document.getElementById("coldQty").innerText = coldCount;
+    updateTotal();
+}
+
+function updateTotal() {
+
+    let total =
+        (amagwinya * 3.50) +
+        (smallCount * 10) +
+        (mediumCount * 15) +
+        (largeCount * 20) +
+        (coldCount * 6);
+
+    document.getElementById("cartTotal").innerText =
+        total.toFixed(2);
+}
+
+function viewOrders() {
+
+    let output = "<h3>Saved Orders</h3>";
+
+    for (let order of orders) {
+
+      output += `
+<div style="
+    background:white;
+    padding:10px;
+    margin:10px 0;
+    border-radius:10px;
+">
+
+<b>${order.orderNumber}</b><br>
+
+Customer:
+${order.customer}<br>
+
+Total:
+R${order.total}<br>
+
+Runner:
+${order.runner}<br>
+
+Status:
+${order.status}
+
+</div>
+`;
+    }
+
+    document.getElementById("ordersList").innerHTML =
+        output;
+
+        document.getElementById("savedOrders")
+        .scrollIntoView({
+            behavior: "smooth"
+        });
+document.getElementById("savedOrders")
+        .style.backgroundColor = "#fff3cd";
+        
+}
+
+</script>
+
+</body>
+</html>
