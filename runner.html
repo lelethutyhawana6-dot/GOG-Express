@@ -1,29 +1,76 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-<title>GOG Express Runner</title>
+    <title>GOG Express Runner V7</title>
+
 </head>
 
 <body>
 
+<!-- ========================================= -->
+<!-- GOG EXPRESS RUNNER LOGIN -->
+<!-- ========================================= -->
+
+<div id="loginPage">
+
+    <h1>🏍️ GOG EXPRESS RUNNER</h1>
+
+    <h2>Runner Login</h2>
+
+    <input
+        type="text"
+        id="runnerId"
+        placeholder="Runner ID">
+
+    <br><br>
+
+    <input
+        type="password"
+        id="runnerPin"
+        placeholder="5-digit PIN">
+
+    <br><br>
+
+    <button onclick="loginRunner()">
+        Login
+    </button>
+
+</div>
+
+<!-- ========================================= -->
+<!-- RUNNER DASHBOARD -->
+<!-- ========================================= -->
+
+<div id="dashboard" style="display:none;">
+
     <h1>🏍️ GOG EXPRESS RUNNER DASHBOARD</h1>
-    <h2> Ready to go? Enjoy, mate!</h2>
+
+    <h2 id="welcomeText">
+        Ready to go? Enjoy, mate!
+    </h2>
 
     <button onclick="loadOrders()">
         Load Orders
     </button>
 
     <button onclick="loadOrderSummary()">
-    Order Summary
-</button>
+        Order Summary
+    </button>
+
+    <button onclick="logoutRunner()">
+        Logout
+    </button>
+
+    <button onclick="testSound()">
+        🔔 Test Sound
+    </button>
 
     <hr>
 
@@ -32,155 +79,472 @@
         No orders loaded yet.
 
     </div>
-<button onclick="testSound()">
-    🔔 Test Sound
-</button>
 
-</body>    
+</div>
 
-    <script type="module">
+<script type="module">
 
-        import { initializeApp }
-        from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-
-        import {
-            getFirestore,
-            collection,
-            getDocs,
-            doc,
-            updateDoc
-        }
-        from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+//==================================================
+// GOG EXPRESS RUNNER V7
+// Developed by Lelethu Tyhawana
+// Assisted by ChatGPT
+//==================================================
 
 
-        const firebaseConfig = {
+//=========================
+// FIREBASE IMPORTS
+//=========================
 
-            apiKey: "AIzaSyBW6l4EVSaaNYnxuIt2rVsVDEj2RQdXBR8",
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
 
-            authDomain: "gog-express.firebaseapp.com",
+import {
 
-            projectId: "gog-express",
+    getFirestore,
+    collection,
+    getDocs,
+    doc,
+    updateDoc
 
-            storageBucket: "gog-express.firebasestorage.app",
+}
+from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
-            messagingSenderId: "831128185396",
 
-            appId: "1:831128185396:web:e6a3b4bbaa4b0c1e103861",
+//=========================
+// FIREBASE CONFIG
+//=========================
 
-            measurementId: "G-2R7CLDKEPV"
+const firebaseConfig = {
 
-        };
+    apiKey: "AIzaSyBW6l4EVSaaNYnxuIt2rVsVDEj2RQdXBR8",
 
-const notificationSound = new Audio("notification.mp3");
+    authDomain: "gog-express.firebaseapp.com",
+
+    projectId: "gog-express",
+
+    storageBucket: "gog-express.firebasestorage.app",
+
+    messagingSenderId: "831128185396",
+
+    appId: "1:831128185396:web:e6a3b4bbaa4b0c1e103861",
+
+    measurementId: "G-2R7CLDKEPV"
+
+};
+
+
+//=========================
+// INITIALIZE FIREBASE
+//=========================
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+
+//=========================
+// NOTIFICATION SOUND
+//=========================
+
+const notificationSound =
+    new Audio("notification.mp3");
+
 function testSound() {
+
     notificationSound.play();
+
 }
 
 window.testSound = testSound;
 
-        const app =
-            initializeApp(firebaseConfig);
 
-        const db =
-            getFirestore(app);
+//=========================
+// RUNNER DATABASE
+//=========================
 
-        async function loadOrders() {
+const runners = [
 
-            let html = "";
+    {
 
-            const querySnapshot =
-                await getDocs(
-                    collection(db, "orders")
-                );
+        id: "GOG001",
 
-            querySnapshot.forEach((doc) => {
+        name: "Lelethu",
 
-                const data = doc.data();
+        pin: "12345"
 
-            if (data.status !== "Pending Payment") {
-              return;
-            }
-                console.log(doc.id);
+    },
 
-                html += `
+    {
 
-                <div style="
-                border:1px solid black;
-                margin:10px;
-                padding:10px;
-                ">
+        id: "GOG002",
 
-                <h3>${data.orderNumber}</h3>
+        name: "AI",
 
-                <p>
-                Customer:
-                ${data.customer}
-                </p>
+        pin: "54321"
 
-                <p>
-                Location:
-                ${data.location}
-                </p>
+    },
 
-                <p>
-                Institution:
-                ${data.institution}
-                </p>
+    {
 
-                <p>
-                Total:
-                R${data.total}
-                </p>
+        id: "GOG003",
 
-                <p>
-                Runner:
-                ${data.runner}
-                </p>
+        name: "Mahlathi",
 
-                <p>
-                Status:
-                ${data.status}
-                </p>
+        pin: "67890"
 
-                </div>
-                <button onclick="acceptOrder('${doc.id}')">
-Accept Order
-</button>
+    }
 
-                `;
+];
 
-            });
+//=========================
+// LOGIN
+//=========================
 
-            document.getElementById(
-                "ordersList"
-            ).innerHTML = html;
+function loginRunner() {
 
-            
-        }
+    const id =
+        document.getElementById("runnerId").value.trim();
+
+    const pin =
+        document.getElementById("runnerPin").value.trim();
+
+    const runner = runners.find(r =>
+        r.id === id &&
+        r.pin === pin
+    );
+
+    if (!runner) {
+
+        alert("Incorrect Runner ID or PIN.");
+
+        return;
+
+    }
+
+    // Save runner details
+
+    sessionStorage.setItem(
+        "runnerId",
+        runner.id
+    );
+
+    sessionStorage.setItem(
+        "runnerName",
+        runner.name
+    );
+
+    // Hide login page
+
+    document.getElementById(
+        "loginPage"
+    ).style.display = "none";
+
+    // Show dashboard
+
+    document.getElementById(
+        "dashboard"
+    ).style.display = "block";
+
+    // Welcome message
+
+    document.getElementById(
+        "welcomeText"
+    ).innerHTML =
+        "Welcome, " +
+        runner.name +
+        "! Ready to go?";
+
+    alert(
+        "Welcome " +
+        runner.name +
+        "!"
+    );
+
+    loadOrders();
+
+}
 
 
-        async function acceptOrder(id) {
+
+//=========================
+// LOGOUT
+//=========================
+
+function logoutRunner() {
+
+    sessionStorage.removeItem(
+        "runnerId"
+    );
+
+    sessionStorage.removeItem(
+        "runnerName"
+    );
+
+    document.getElementById(
+        "dashboard"
+    ).style.display = "none";
+
+    document.getElementById(
+        "loginPage"
+    ).style.display = "block";
+
+    document.getElementById(
+        "runnerId"
+    ).value = "";
+
+    document.getElementById(
+        "runnerPin"
+    ).value = "";
+
+}
+
+
+
+//=========================
+// AUTO LOGIN
+//=========================
+
+const savedRunner =
+    sessionStorage.getItem(
+        "runnerName"
+    );
+
+if (savedRunner) {
+
+    document.getElementById(
+        "loginPage"
+    ).style.display = "none";
+
+    document.getElementById(
+        "dashboard"
+    ).style.display = "block";
+
+    document.getElementById(
+        "welcomeText"
+    ).innerHTML =
+        "Welcome back, " +
+        savedRunner +
+        "!";
+
+    loadOrders();
+
+}
+
+
+
+//=========================
+// WINDOW FUNCTIONS
+//=========================
+
+window.loginRunner =
+    loginRunner;
+
+window.logoutRunner =
+    logoutRunner;
+
+    //=========================
+// LOAD AVAILABLE ORDERS
+//=========================
+
+async function loadOrders() {
+
+    let html = "";
+
+    const querySnapshot =
+        await getDocs(collection(db, "orders"));
+
+    querySnapshot.forEach((docSnap) => {
+
+        const data = docSnap.data();
+
+        if (data.status !== "Pending Payment") return;
+
+        html += `
+
+        <div style="
+            border:1px solid black;
+            padding:10px;
+            margin:10px;
+        ">
+
+            <h3>${data.orderNumber}</h3>
+
+            <p><b>Customer:</b> ${data.customer}</p>
+
+            <p><b>Institution:</b> ${data.institution}</p>
+
+            <p><b>Location:</b> ${data.location}</p>
+
+            <p><b>Total:</b> R${data.total}</p>
+
+            <button onclick="acceptOrder('${docSnap.id}')">
+                Accept Order
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
+    if(html===""){
+        html="<h3>No available orders.</h3>";
+    }
+
+    document.getElementById("ordersList").innerHTML = html;
+
+}
+
+
+
+//=========================
+// ACCEPT ORDER
+//=========================
+
+async function acceptOrder(id){
 
     await updateDoc(
-        doc(db, "orders", id),
+        doc(db,"orders",id),
         {
-            runner: "Lelethu",
-            status: "Accepted"
+
+            runner:
+                sessionStorage.getItem("runnerName"),
+
+            status:
+                "Accepted"
+
         }
     );
 
     alert("Order Accepted!");
 
     loadOrders();
+
 }
 
-async function startDelivery(id) {
+
+
+//=========================
+// LOAD ORDER SUMMARY
+//=========================
+
+async function loadOrderSummary(){
+
+    let html="";
+
+    const querySnapshot=
+        await getDocs(collection(db,"orders"));
+
+    querySnapshot.forEach((docSnap)=>{
+
+        const data=docSnap.data();
+
+        if(
+            data.runner !==
+            sessionStorage.getItem("runnerName")
+        ){
+            return;
+        }
+
+        html+=`
+
+<div style="
+border:1px solid green;
+padding:10px;
+margin:10px;
+">
+
+<h3>${data.orderNumber}</h3>
+
+<p><b>Customer:</b> ${data.customer}</p>
+
+<p><b>Total:</b> R${data.total}</p>
+
+<p><b>Status:</b> ${data.status}</p>
+
+<p><b>Special Request:</b>
+${data.specialRequest || "None"}
+</p>
+
+${
+data.status==="Accepted"
+
+?
+
+`<button onclick="startDelivery('${docSnap.id}')">
+
+Confirm Pick-up / Payment
+
+</button>`
+
+:
+
+""
+
+}
+
+${
+data.status==="In Transit"
+
+?
+
+`
+
+<input
+id="pin-${docSnap.id}"
+placeholder="Enter PIN">
+
+<button
+onclick="completeDelivery('${docSnap.id}')">
+
+Confirm Delivery
+
+</button>
+
+`
+
+:
+
+""
+
+}
+
+</div>
+
+`;
+
+    });
+
+    if(html===""){
+
+        html="<h3>No active deliveries.</h3>";
+
+    }
+
+    document.getElementById(
+        "ordersList"
+    ).innerHTML=html;
+
+}
+
+
+
+//=========================
+// START DELIVERY
+//=========================
+
+async function startDelivery(id){
 
     await updateDoc(
-        doc(db, "orders", id),
+
+        doc(db,"orders",id),
+
         {
-            status: "In Transit"
+
+            status:"In Transit"
+
         }
+
     );
 
     alert("Delivery Started!");
@@ -189,40 +553,57 @@ async function startDelivery(id) {
 
 }
 
-async function completeDelivery(id) {
 
-    const querySnapshot =
-        await getDocs(
-            collection(db, "orders")
-        );
 
-    let orderData = null;
+//=========================
+// COMPLETE DELIVERY
+//=========================
 
-    querySnapshot.forEach((docSnap) => {
+async function completeDelivery(id){
 
-        if(docSnap.id === id){
-            orderData = docSnap.data();
+    const querySnapshot=
+        await getDocs(collection(db,"orders"));
+
+    let orderData=null;
+
+    querySnapshot.forEach((docSnap)=>{
+
+        if(docSnap.id===id){
+
+            orderData=docSnap.data();
+
         }
 
     });
 
-    const enteredPin =
+    const enteredPin=
+
         document.getElementById(
             `pin-${id}`
         ).value;
 
     if(
-        enteredPin != orderData.orderCode
+
+        enteredPin!=orderData.orderCode
+
     ){
+
         alert("Incorrect PIN!");
+
         return;
+
     }
 
     await updateDoc(
-        doc(db, "orders", id),
+
+        doc(db,"orders",id),
+
         {
-            status: "Delivered"
+
+            status:"Delivered"
+
         }
+
     );
 
     alert("Delivery Completed!");
@@ -231,110 +612,24 @@ async function completeDelivery(id) {
 
 }
 
-window.loadOrders = loadOrders;
-window.acceptOrder = acceptOrder;
-window.loadOrderSummary = loadOrderSummary;
-window.startDelivery = startDelivery;
-window.completeDelivery = completeDelivery;
-
-async function loadOrderSummary() {
-
-    let html = "";
-
-    const querySnapshot =
-        await getDocs(
-            collection(db, "orders")
-        );
-
-    querySnapshot.forEach((docSnap) => {
-
-        const data = docSnap.data();
-
-        if (data.runner !== "Lelethu") {
-            return;
-        }
-
-        html += `
-
-        <div style="
-        border:1px solid green;
-        margin:10px;
-        padding:10px;
-        ">
-
-        <h3>${data.orderNumber}</h3>
-
-        <p>
-        Customer:
-        ${data.customer}
-        </p>
-
-        <p>
-        Location:
-        ${data.location}
-        </p>
-
-        <p>
-        Institution:
-        ${data.institution}
-        </p>
-
-        <p>
-        Total:
-        R${data.total}
-        </p>
-        
-        <p>
-        <b>Special Request:
-        ${data.specialRequest || "None"}
-        </p>
-
-        <p>
-        Runner:
-        ${data.runner}
-        </p>
-
-        <p>
-        Status:
-        ${data.status}
-        
-        
-        ${data.status === "Accepted"
-? `<button onclick="startDelivery('${docSnap.id}')">
-     Confirm Pick-up / Payment
-   </button>`
-: ""}
-
-${data.status === "In Transit"
-? `
-<input
-id="pin-${docSnap.id}"
-placeholder="Enter PIN">
 
 
+//=========================
+// GLOBAL FUNCTIONS
+//=========================
 
-<button onclick="completeDelivery('${docSnap.id}')">
-Confirm Delivery
-</button>
-`
-: ""}
+window.loadOrders=loadOrders;
 
-        </p>
+window.acceptOrder=acceptOrder;
 
-        </div>
+window.loadOrderSummary=loadOrderSummary;
 
-        `;
+window.startDelivery=startDelivery;
 
-    });
+window.completeDelivery=completeDelivery;
 
-    document.getElementById(
-        "ordersList"
-    ).innerHTML = html;
-
-}
-
-    </script>
+</script>
 
 </body>
 
-</html> 
+</html>
