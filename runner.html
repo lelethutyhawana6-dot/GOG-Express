@@ -371,11 +371,25 @@ async function loadOrders() {
 
             <p><b>Customer:</b> ${data.customer}</p>
 
-            <p><b>Institution:</b> ${data.institution}</p>
+<p><b>Institution:</b> ${data.institution}</p>
 
-            <p><b>Location:</b> ${data.location}</p>
+<p><b>Location:</b> ${data.location}</p>
 
-            <p><b>Total:</b> R${data.total}</p>
+<p><b>Order:</b> ${data.order || "None"}</p>
+
+<p style="
+background:#fff3cd;
+padding:8px;
+border-left:5px solid orange;
+">
+
+<b>🛒 Special Request:</b><br>
+
+${data.specialRequest || "None"}
+
+</p>
+
+<p><b>Total:</b> R${data.total}</p>
 
             <button onclick="acceptOrder('${docSnap.id}')">
                 Accept Order
