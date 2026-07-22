@@ -271,7 +271,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebas
 import {
   getFirestore,
   collection,
-  addDoc
+  addDoc,
+  getDocs,
+  query,
+  where
 }
 from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
@@ -316,6 +319,35 @@ orders.push(orderData);
     }
 
 }
+async function isDuplicateOrder(customer, institution, location, order, specialRequest) {
+
+    const q = query(
+        collection(db, "orders"),
+        where("customer", "==", customer)
+    );
+
+    const snapshot = await getDocs(q);
+
+    const twoMinutesAgo = Date.now() - (2 * 60 * 1000);
+
+    for (const doc of snapshot.docs) {
+
+        const data = doc.data();
+
+        if (
+            data.institution === institution &&
+            data.location === location &&
+            data.order === order &&
+            data.specialRequest === specialRequest &&
+            data.createdAt >= twoMinutesAgo
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 async function placeOrder() {
 
     if (!validateCustomer()) {
@@ -432,7 +464,7 @@ const orderData = {
 
     institution:
         document.getElementById("institution").value,
-
+    order: orderItems,
     total:
         document.getElementById("cartTotal").innerText,
 
@@ -447,6 +479,24 @@ const orderData = {
     createdAt: Date.now(),
 
 };
+
+const customer =
+    document.getElementById("initials").value +
+    " " +
+    document.getElementById("surname").value;
+
+const duplicate = await isDuplicateOrder(
+    customer,
+    document.getElementById("institution").value,
+    document.getElementById("location").value,
+    orderItems,
+    document.getElementById("specialRequest").value
+);
+
+if (duplicate) {
+    alert("⚠ You have already submitted this exact order. If you want more items, please change your cart before placing another order.");
+    return;
+}
 
 await addDoc(
     collection(db, "orders"),
@@ -465,6 +515,33 @@ You will give it to the runner when your order arrives.`
 );
 
 console.log("Order saved to Firestore!");
+resetCart();
+
+window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+});
+
+function resetCart() {
+
+    amagwinya = 0;
+    smallCount = 0;
+    mediumCount = 0;
+    largeCount = 0;
+    coldCount = 0;
+
+    document.getElementById("amagwinyaQty").innerText = 0;
+    document.getElementById("smallQty").innerText = 0;
+    document.getElementById("mediumQty").innerText = 0;
+    document.getElementById("largeQty").innerText = 0;
+    document.getElementById("coldQty").innerText = 0;
+
+    document.getElementById("specialRequest").value = "";
+
+    updateTotal();
+
+}
+
 
 }
 
