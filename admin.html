@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>GOG Express Operational Centre</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f5f5f5;
+}
+
+header{
+    background:orange;
+    color:white;
+    text-align:center;
+    padding:20px;
+    box-shadow:0 3px 10px rgba(0,0,0,.2);
+}
+
+header h1{
+    font-size:34px;
+    margin-bottom:5px;
+}
+
+header h2{
+    font-size:22px;
+    margin-bottom:5px;
+}
+
+header p{
+    font-size:15px;
+}
+
+.container{
+    width:95%;
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+}
+
+.vendorBtn{
+
+    width:100%;
+    padding:15px;
+    background:orange;
+    color:white;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+    margin-bottom:20px;
+
+}
+
+.vendorBtn:hover{
+
+    background:#ff9800;
+
+}
+
+.searchBox{
+
+    margin-bottom:20px;
+
+}
+
+.searchBox input{
+
+    width:100%;
+    padding:12px;
+    font-size:16px;
+    border:1px solid #ccc;
+    border-radius:10px;
+
+}
+
+.orderCard{
+
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 3px 10px rgba(0,0,0,.1);
+    margin-bottom:20px;
+
+}
+
+.orderCard h2{
+
+    color:orange;
+    margin-bottom:10px;
+    font-size:24px;
+
+}
+
+.orderCard p{
+
+    margin:8px 0;
+    line-height:1.5;
+
+}
+
+.status{
+
+    display:inline-block;
+    padding:8px 15px;
+    border-radius:20px;
+    font-weight:bold;
+    background:#fff3cd;
+    color:#856404;
+    margin-top:10px;
+
+}
+
+.buttons{
+
+    margin-top:20px;
+
+}
+
+.buttons button{
+
+    padding:10px 18px;
+    border:none;
+    border-radius:8px;
+    color:white;
+    cursor:pointer;
+    margin-right:10px;
+    margin-bottom:10px;
+    font-size:15px;
+
+}
+
+.approve{
+
+    background:green;
+
+}
+
+.delete{
+
+    background:red;
+
+}
+
+.approve:hover{
+
+    background:#006400;
+
+}
+
+.delete:hover{
+
+    background:#c82333;
+
+}
+
+@media(max-width:768px){
+
+header h1{
+
+font-size:28px;
+
+}
+
+header h2{
+
+font-size:20px;
+
+}
+
+.vendorBtn{
+
+font-size:16px;
+
+}
+
+.buttons button{
+
+width:100%;
+margin-right:0;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>🚚 GOG EXPRESS</h1>
+
+<h2>Operational Centre</h2>
+
+<p>Born eKasi. Built for the Future.</p>
+
+</header>
+
+<div class="container">
+
+<button
+class="vendorBtn"
+onclick="sendVendor()">
+
+📤 Send Orders to Vendor
+
+</button>
+
+<div class="searchBox">
+
+<input
+type="text"
+id="searchInput"
+placeholder="Search customer, order number or location...">
+
+</div>
+
+<div id="ordersContainer">
+
+Loading Orders...
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+
+import {
+
+    getFirestore,
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    updateDoc,
+    deleteDoc,
+    doc
+
+} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+const firebaseConfig = {
+
+    apiKey: "YOUR API KEY",
+
+    authDomain: "gog-express.firebaseapp.com",
+
+    projectId: "gog-express",
+
+    storageBucket: "gog-express.firebasestorage.app",
+
+    messagingSenderId: "831128185396",
+
+    appId: "YOUR APP ID",
+
+    measurementId: "YOUR MEASUREMENT ID"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+const ordersContainer =
+document.getElementById("ordersContainer");
+
+const searchInput =
+document.getElementById("searchInput");
+
+loadOrders();
+
+searchInput.addEventListener("keyup", () => {
+
+    loadOrders(searchInput.value);
+
+});
+
+async function loadOrders(search = ""){
+
+    ordersContainer.innerHTML = "Loading Orders...";
+
+    const q = query(
+
+        collection(db,"orders"),
+
+        orderBy("createdAt","desc")
+
+    );
+
+    const snapshot = await getDocs(q);
+
+    ordersContainer.innerHTML = "";
+    snapshot.forEach((document)=>{
+
+        const data = document.data();
+
+        const id = document.id;
+
+        const searchText = (
+
+            (data.orderNumber || "") + " " +
+
+            (data.customer || "") + " " +
+
+            (data.location || "") + " " +
+
+            (data.institution || "") + " " +
+
+            (data.order || "")
+
+        ).toLowerCase();
+
+        if(!searchText.includes(search.toLowerCase())){
+
+            return;
+
+        }
+
+        let statusColor = "#fff3cd";
+        let textColor = "#856404";
+
+        if(data.status === "Accepted"){
+
+            statusColor = "#d4edda";
+            textColor = "#155724";
+
+        }
+
+        if(data.status === "In Transit"){
+
+            statusColor = "#cce5ff";
+            textColor = "#004085";
+
+        }
+
+        if(data.status === "Delivered"){
+
+            statusColor = "#d1e7dd";
+            textColor = "#0f5132";
+
+        }
+
+        ordersContainer.innerHTML += `
+
+<div class="orderCard">
+
+<h2>${data.orderNumber}</h2>
+
+<p><strong>Customer:</strong> ${data.customer}</p>
+
+<p><strong>Location:</strong> ${data.location}</p>
+
+<p><strong>Institution:</strong> ${data.institution}</p>
+
+<p><strong>Order:</strong><br>${data.order || "No items saved."}</p>
+
+<p><strong>Special Request:</strong><br>${data.specialRequest || "None"}</p>
+
+<p><strong>Total:</strong> R${data.total}</p>
+
+<p
+class="status"
+style="
+background:${statusColor};
+color:${textColor};
+">
+
+${data.status}
+
+</p>
+
+<div class="buttons"> 
+
+    <button
+class="approve"
+onclick="approveOrder('${id}')">
+
+✅ Approve
+
+</button>
+
+<button
+class="delete"
+onclick="deleteOrder('${id}')">
+
+🗑 Delete
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
+    });
+
+    if(ordersContainer.innerHTML === ""){
+
+        ordersContainer.innerHTML = `
+
+        <div class="orderCard">
+
+        <h2>No Orders Found</h2>
+
+        <p>No matching orders were found.</p>
+
+        </div>
+
+        `;
+
+    }
+
+}
+
+async function approveOrder(id){
+
+    await updateDoc(
+
+        doc(db,"orders",id),
+
+        {
+
+            status:"Accepted"
+
+        }
+
+    );
+
+    alert("✅ Order approved successfully.");
+
+    loadOrders(searchInput.value);
+
+}
+
+async function deleteOrder(id){
+
+    const confirmDelete = confirm(
+
+        "Are you sure you want to delete this order?"
+
+    );
+
+    if(!confirmDelete){
+
+        return;
+
+    }
+
+    await deleteDoc(
+
+        doc(db,"orders",id)
+
+    );
+
+    alert("🗑 Order deleted successfully.");
+
+    loadOrders(searchInput.value);
+
+}
+
+async function sendVendor(){
+
+    const q = query(
+
+        collection(db,"orders"),
+
+        orderBy("createdAt","asc")
+
+    );
+
+    const snapshot = await getDocs(q);
+
+    let message = `🍟 THANGANA'S ORDER
+
+==============================
+
+`;
+
+    snapshot.forEach((document)=>{
+
+        const data = document.data();
+
+        message += `📦 ${data.orderNumber}
+
+👤 ${data.customer}
+
+📍 ${data.location}
+
+🏫 ${data.institution}
+
+🍔 ORDER
+
+${data.order || "No items"}
+
+`;
+
+        if(
+
+            data.specialRequest &&
+            data.specialRequest.trim() !== ""
+
+        ){
+
+            message += `🚨 SPECIAL REQUEST
+
+${data.specialRequest}
+
+`;
+
+        }
+
+        message += `💰 TOTAL : R${data.total}
+
+--------------------------------
+
+`;
+
+    });
+
+    window.open(
+
+        "https://wa.me/?text=" +
+
+        encodeURIComponent(message),
+
+        "_blank"
+
+    );
+
+}
+
+window.sendVendor = sendVendor;
+
+window.approveOrder = approveOrder;
+
+window.deleteOrder = deleteOrder;
+
+</script>
+
+</body>
+
+</html>
