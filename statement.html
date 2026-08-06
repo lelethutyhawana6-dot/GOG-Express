@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Statements | GOG Payroll</title>
+
+<link rel="stylesheet" href="../css/statement.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script type="module" src="../js/statement.js" defer></script>
+
+</head>
+
+<body>
+
+<header>
+
+<a href="dashboard.html" class="backBtn">
+
+← Dashboard
+
+</a>
+
+<h1>📄 Runner Statement</h1>
+
+<p>Generate Weekly Earnings Statement</p>
+
+</header>
+
+<main>
+
+<section class="statementCard">
+
+<h2>Select Runner</h2>
+
+<select id="runnerSelect">
+
+<option value="">Choose Runner</option>
+
+</select>
+
+<button id="generateBtn">
+
+Generate Statement
+
+</button>
+
+</section>
+
+<section
+id="statement"
+class="statement hidden">
+
+<h2>GOG PAYROLL</h2>
+
+<p id="runnerName"></p>
+
+<hr>
+
+<div class="row">
+
+<span>Total Profit</span>
+
+<strong id="profit">
+
+R0.00
+
+</strong>
+
+</div>
+
+<div class="row">
+
+<span>20% Earnings</span>
+
+<strong id="commission">
+
+R0.00
+
+</strong>
+
+</div>
+
+<div class="row">
+
+<span>Quest Bonus</span>
+
+<strong id="quest">
+
+R0.00
+
+</strong>
+
+</div>
+
+<div class="row">
+
+<span>Total Earnings</span>
+
+<strong id="runnerTotal">
+
+R0.00
+
+</strong>
+
+</div>
+
+<hr>
+
+<p class="thanks">
+
+Thank you for being part of GOG ❤️
+
+</p>
+
+<button onclick="window.print()">
+
+🖨 Print / Save PDF
+
+</button>
+
+</section>
+
+</main>
+
+</body>
+
+</html>

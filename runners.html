@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Runners | GOG Payroll</title>
+
+    <link rel="stylesheet"
+          href="../css/runners.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <script type="module"
+            src="../js/runners.js"
+            defer></script>
+
+</head>
+
+<body>
+
+<header>
+
+    <a href="dashboard.html" class="backBtn">
+
+        ← Dashboard
+
+    </a>
+
+    <h1>👥 Runners</h1>
+
+    <p>Add and manage your team.</p>
+
+</header>
+
+
+<main>
+
+<section class="formCard">
+
+<h2>Add Runner</h2>
+
+<form id="runnerForm">
+
+<input
+type="text"
+id="runnerName"
+placeholder="Runner Name"
+required>
+
+<input
+type="text"
+id="runnerTerritory"
+placeholder="Territory / Grade"
+required>
+
+<button type="submit">
+
+Save Runner
+
+</button>
+
+</form>
+
+</section>
+
+
+<section class="tableCard">
+
+<h2>Registered Runners</h2>
+
+<div id="runnerList">
+
+<p class="empty">
+
+No runners yet.
+
+</p>
+
+</div>
+
+</section>
+
+</main>
+
+</body>
+
+</html>

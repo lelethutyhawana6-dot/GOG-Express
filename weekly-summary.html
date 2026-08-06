@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Weekly Summary | GOG Payroll</title>
+
+<link rel="stylesheet" href="../css/weekly-summary.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script type="module" src="../js/weekly-summary.js" defer></script>
+
+</head>
+
+<body>
+
+<header>
+
+<a href="dashboard.html" class="backBtn">
+
+← Dashboard
+
+</a>
+
+<h1>📊 Weekly Summary</h1>
+
+<p>Runner Performance Overview</p>
+
+</header>
+
+<main>
+
+<section class="summaryCard">
+
+<h2>Select Runner</h2>
+
+<select id="runnerSelect">
+
+<option value="">Choose Runner</option>
+
+</select>
+
+</section>
+
+<section class="summaryCard">
+
+<h2>Weekly Performance</h2>
+
+<div class="row">
+
+<span>Total Profit</span>
+
+<strong id="profit">
+
+R0.00
+
+</strong>
+
+</div>
+
+<div class="row">
+
+<span>20% Earnings</span>
+
+<strong id="commission">
+
+R0.00
+
+</strong>
+
+</div>
+
+<div class="row">
+
+<span>Quest Bonus</span>
+
+<strong id="quest">
+
+R0.00
+
+</strong>
+
+</div>
+
+<div class="row">
+
+<span>Total Runner Earnings</span>
+
+<strong id="runnerTotal">
+
+R0.00
+
+</strong>
+
+</div>
+
+<div class="row">
+
+<span>GOG Earnings</span>
+
+<strong id="gogTotal">
+
+R0.00
+
+</strong>
+
+</div>
+
+</section>
+
+<section class="summaryCard">
+
+<h2>Daily Records</h2>
+
+<div id="history">
+
+<p class="empty">
+
+No records found.
+
+</p>
+
+</div>
+
+</section>
+
+</main>
+
+</body>
+
+</html>
